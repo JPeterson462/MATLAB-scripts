@@ -16,6 +16,7 @@ function result = NewtonInterpolant(f, X, N)
     for v=1:N+1
         p(N+1-v+1) = M(1,N+1-v+1);
     end
+    disp(p);
     result = @(y) P(X, p, N, y);
 end
 

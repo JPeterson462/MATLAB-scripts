@@ -1,60 +1,63 @@
-function result = Spline(X, f, N)
-    % Compute the slopes of the spline
-    M = zeros(N+1, N+1);
+function result = Spline(X, F)
+    N = length(X) - 1;
+    ThetaLeft = zeros(N - 1, 1);
+    ThetaRight = zeros(N - 1, 1);
+    for v=1:N-1
+        dx = (GetByZeroIndex(X, v + 1) - GetByZeroIndex(X, v - 1));
+        ThetaLeft(v) = (GetByZeroIndex(X, v + 1) - GetByZeroIndex(X, v)) / dx;
+        ThetaRight(v) = (GetByZeroIndex(X, v) - GetByZeroIndex(X, v - 1)) / dx;
+    end
+    DividedDifference = @(v) (GetByZeroIndex(F, v + 1) - GetByZeroIndex(F, v))/(GetByZeroIndex(X, v + 1) - GetByZeroIndex(X, v));
+    R = zeros(N + 1, 1);
+    R(1) = DividedDifference(0);
+    for v=1:N-1
+        R(v + 1) = ThetaLeft(v) * DividedDifference(v - 1) + ThetaRight(v) * DividedDifference(v);
+    end
+    R(N + 1) = DividedDifference(N - 1);
+    M = zeros(N + 1, N + 1);
     for i=1:N+1
-        for j=1:N+1
-            if j == i - 1
-                if i == N+1
-                    M(i, j) = 1/3;
-                elseif i > 1
-                    v = i - 1;
-                    M(i, j) = (1/3) * (X(v + 1) - X(v)) / (X(v + 1) - X(v - 1));
-                end
-            elseif j == i
-                M(i, j) = 2/3;
-            elseif j == i + 1
-                if i == 1
-                    M(i, j) = 1/3;
-                elseif i < N+1
-                    v = i - 1;
-                    M(i, j) = (1/3) * (X(v) - X(v - 1)) / (X(v + 1) - X(v - 1));
-                end
+        M(i, i) = 2/3;
+        if i == 1
+            M(i, i + 1) = 1/3;
+        elseif i == N+1
+            M(i, i - 1) = 1/3;
+        else
+            M(i, i - 1) = (1/3) * ThetaLeft(i - 1);
+            M(i, i + 1) = (1/3) * ThetaRight(i - 1);
+        end
+    end
+    S = M\R;
+    SN = @(x) C(F, X, x, S, N);
+    result = SN;
+end
+
+function result = C(F, X, x, S, N)
+    if x == GetByZeroIndex(X, N)
+        result = Cv(F, X, x, S, N - 1);
+    else
+        for v=0:N-1
+            X0 = GetByZeroIndex(X, v);
+            X1 = GetByZeroIndex(X, v + 1);
+            if X0 <= x && x < X1
+                result = Cv(F, X, x, S, v);
             end
         end
     end
-    R = zeros(N+1, 1);
-    for i=1:N+1
-        if i == 1
-            R(i) = (f(X(1)) - f(X(0))) / (X(1) - X(0));
-        elseif i == N
-            R(i) = (f(X(N)) - f(X(N-1))) / (X(N) - X(N-1));
-        else
-            v = i-1;
-            a = ((X(v + 1) - X(v)) / (X(v + 1) - X(v - 1))) * (f(X(v)) - f(X(v - 1))) / (X(v) - X(v - 1));
-            b = ((X(v) - X(v - 1)) / (X(v + 1) - X(v - 1))) * (f(X(v + 1)) - f(X(v))) / (X(v + 1) - X(v));
-            R(i) = a + b;
-        end
-    end
-    disp(M);
-    disp(R);
-    S = M\R;
-    % Compute each cubic Hermite interpolant
-    result = @(x) SN(S, X, f, x, N);
 end
 
-function result = SN(S, X, f, x, N)
-    for v=0:N-1
-        if X(v) <= x < X(v + 1)
-            result = C(v, S, X, f, x, N);
-        end
-    end
-    if x == X(N)
-        result = C(N - 1, S, X, f, x, N);
-    end
+function result = Cv(F, X, x, S, v)
+    F0 = GetByZeroIndex(F, v);
+    F1 = GetByZeroIndex(F, v + 1);
+    X0 = GetByZeroIndex(X, v);
+    X1 = GetByZeroIndex(X, v + 1);
+    dx = X1 - X0;
+    A = 1 + 2 * (x - X0) / dx;
+    B = 1 - 2 * (x - X1) / dx;
+    C1 = (F0 * A + GetByZeroIndex(S, v) * (x - X0)) * ((x - X1) / dx)^2;
+    C2 = (F1 * B + GetByZeroIndex(S, v + 1) * (x - X1)) * ((x - X0) / dx)^2;
+    result = C1 + C2;
 end
-function result = C(v, S, X, f, x, N)
-    dx = X(v + 1) - X(v);
-    dx1 = x - X(v + 1);
-    dx0 = x - X(v);
-    result = (1 / (dx * dx)) * (((f(X(v)) * (1 + 2 * dx0 / dx) + S(v + 0 + 1) * dx0) * dx1 * dx1) + ((f(X(v + 1)) * (1 - 2 * dx1 / dx) + S(v + 1 + 1) * dx1) * dx0 * dx0));
+
+function result = GetByZeroIndex(A, i)
+    result = A(i + 1);
 end
