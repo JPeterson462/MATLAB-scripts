@@ -1,0 +1,6 @@
+function result = DeltaK(f, x0, k, a, h)
+    sum = 0;
+    m = floor(k / 2);
+    for j=
+    result = sum;
+end
