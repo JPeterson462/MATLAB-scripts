@@ -1,14 +1,12 @@
-function result = DFT(v, N, norm)
-    V = zeros(N, 1);
-    for k=1:N
-       sum = 0;
-       for n=0:N-1
-           sum = sum + exp(-2 * pi * sqrt(-1) * k * n / N) * v(n);
-       end
-       V(k) = (1/sqrt(N)) * sum;
-       if norm
-           V(k) = abs(V(k));
-       end
+function X = DFT(x)
+    N = length(x);
+    X = zeros(N, 1);
+    E = exp(-2 * pi * sqrt(-1) / N);
+    for n = 0:N-1
+        sum = 0;
+        for k = 0:N-1
+            sum = sum + E ^ (n * k) * x(k + 1);
+        end
+        X(n + 1) = sum;
     end
-    result = V;
 end
