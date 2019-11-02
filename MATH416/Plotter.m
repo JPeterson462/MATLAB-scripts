@@ -16,7 +16,7 @@ end
 function result = Approx(x)
     eps = 10^-15;
     if abs(x / eps) < 2
-        result = 0;
+        result = x;
     else
         result = x;
     end
