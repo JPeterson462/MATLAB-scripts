@@ -1,9 +1,7 @@
-function X = matDFT2(x)
-    M = size(x, 1);
-    N = size(x, 2);
-    Wm = generateW(M, M, M);
-    Wn = generateW(N, N, N);
-    X = Wm * x * Wn;
+function X = matDFT(x)
+    N = length(x);
+    W = generateW(N, N, N);
+    X = W * x;
 end
 
 function W = generateW(C, M, N)
