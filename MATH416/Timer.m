@@ -7,8 +7,3 @@ function Timer(Fourier1, Fourier2, N)
    end
    plot(N, T1, 'r', N, T2, 'g');
 end
-
-function t = Time(Fourier, n)
-    M = randi([-50 50], n, n);
-    t = timeit(@() Fourier(M));    
-end
