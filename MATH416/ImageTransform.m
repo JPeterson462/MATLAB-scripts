@@ -2,12 +2,10 @@ function ImageTransform(id, size, transform, rotated)
     degrees = rotated * 90;
     infile = strcat('F:\MATLAB images\image_', id, '_', size, 'x', size, '.jpg');
     outfile = strcat('F:\MATLAB images\image_', id, '_', size, 'x', size, '_transformed_rot', int2str(degrees),'.jpg');
-    in_image = imread(infile);
+    grayscale_image = Image2Matrix(infile);
     for k = 1:rotated
-       in_image = rot90(in_image); 
+       grayscale_image = rot90(grayscale_image); 
     end
-    rgb_image = in_image;
-    grayscale_image = rgb2gray(rgb_image);
     transformed_image = transform(grayscale_image);
     normed_image = abs(transformed_image);
     %log_image = log(normed_image);
