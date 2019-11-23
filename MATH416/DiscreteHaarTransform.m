@@ -1,27 +1,20 @@
-function [Clist, Dlist] = DiscreteHaarTransform(x, e)
+function X = DiscreteHaarTransform(x, e)
     L = length(x);
-    X = x;
-    Clist = cell(log2(L), 1);
-    Dlist = cell(log2(L), 1);
-    Ci = 1;
-    Di = 1;
+    X = zeros(L, 1);
+    C = x;
+    offset = 0;
     while L > 1
-        X = CreateW(L) * X;
-        [Cn, Dn] = GetPair(X, e);
-        Clist{Ci} = Cn;
-        Dlist{Di} = Dn;
-        X = Cn;
-        Ci = Ci + 1;
-        Di = Di + 1;
+        disp(L);
+        M = Threshold(CreateW(L) * C, e);
+        Cn = M(1:length(M)/2);
+        Dn = M(length(M)/2+1:length(M));
+        for k = 1:length(Dn)
+            X(k + offset) = Dn(k);
+        end
+        offset = offset + L/2;
+        C = Cn;
         L = L/2;
     end
-end
-
-function [C, D] = GetPair(X, e)
-    C = X(1:length(X)/2);
-    D = X(length(X)/2+1:length(X));
-    C = ThresholdVec(C, e);
-    D = ThresholdVec(D, e);
 end
 
 function W = CreateW(L)
@@ -35,17 +28,13 @@ function W = CreateW(L)
     W = 1/sqrt(2) * W;
 end
 
-function T = ThresholdVec(Val, e)
-    T = zeros(size(Val));
-    for k = 1:length(Val)
-       T(k) = Threshold(Val(k), e); 
-    end
-end
-
-function t = Threshold(val, e)
-    if abs(val) < e
-        t = 0;
-    else
-        t = val;
+function T = Threshold(V, e)
+    T = zeros(length(V), 1);
+    for k = 1:length(V)
+       val = V(k);
+       if abs(val) < e
+           val = 0;
+       end
+       T(k) = val;
     end
 end
