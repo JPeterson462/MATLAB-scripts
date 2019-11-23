@@ -16,6 +16,6 @@ function W = generateW(C, M, N)
 end
 
 function result = computeW(N, j, k)
-    % j-1 and k-1 adjus indexing since MATLAB is 1-indexed
+    % j-1 and k-1 adjust indexing since MATLAB is 1-indexed
     result = exp(-2 * pi * 1i * (j - 1) * (k - 1) / N);
 end
